@@ -1,0 +1,18 @@
+version: "2"
+plugins:
+  rubocop:
+    enabled: true
+  reek:
+    enabled: true
+  flog:
+    enabled: true
+  duplication:
+    enabled: true
+  fixme:
+    enabled: true
+  git-legal:
+    enabled: true
+  markdownlint:
+    enabled: true
+exclude_patterns:
+- ".idea/"

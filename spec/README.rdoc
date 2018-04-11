@@ -1,0 +1,20 @@
+= CanCan Specs
+
+== Running the specs
+
+To run the specs first run the +bundle+ command to install the necessary gems and the +rake+ command to run the specs.
+
+  bundle
+
+If you are on MRI:
+
+  rake neo4j:install[community-latest,test]
+  rake neo4j:config[test,<port>]
+  rake neo4j:start[test]
+  ENV['NEO4J_URL']=<server url:port> rspec spec
+
+You can use .env file with `dotenv` gem to setup ENV variables.
+
+If you are on jRuby:
+
+  rspec spec

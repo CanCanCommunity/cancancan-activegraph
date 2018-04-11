@@ -1,0 +1,17 @@
+# ignore Rubymine
+.idea
+
+/db/
+.ruby-version
+
+Gemfile.lock
+coverage
+
+# dotenv
+.env
+
+# Mac
+.DS_Store
+
+# Gemfile
+.gem
