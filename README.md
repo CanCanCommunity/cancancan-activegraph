@@ -3,7 +3,7 @@
 This is the adapter for the [CanCanCan](https://github.com/CanCanCommunity/cancancan) authorization
 library to automatically generate Cypher queries from ability rules. It returns QueryProxy object for resources.
 
-Adds support for neo4j >= 9.0
+Adds support for neo4j >= 9.0 and cancancan <= 2.1.4
 
 ## Ruby Versions Supported
 
