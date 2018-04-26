@@ -116,6 +116,14 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
             include_context 'match expectations'
           end
 
+          context 'nested condition with 1st relation being has one' do
+            before(:example) do
+              @article2.user = @user
+              @ability.can :read, Article, user: {mentions: {active: true} }
+            end
+            include_context 'match expectations'
+          end
+
           context 'condition to check non existance of relation on one level deep model with base model conditions' do
             before(:example) do
               @article2.mentions << Mention.create!
