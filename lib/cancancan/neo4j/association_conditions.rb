@@ -20,7 +20,7 @@ module CanCanCan
           rel_length = associations_conditions.delete(:rel_length)
           current_path = append_path_to_conditions(relationship, model_conditions, rel_length)
           append_model_conditions(model_conditions, relationship, current_path)
-          append_association_conditions(associations_conditions, relationship)
+          append_association_conditions(associations_conditions, relationship, rel_length)
         end
       end
 
@@ -28,9 +28,9 @@ module CanCanCan
         @options[:parent_class].associations[association]
       end
 
-      def append_association_conditions(conditions, relationship)
+      def append_association_conditions(conditions, relationship, rel_length)
         return if conditions.blank?
-        asso_conditions_obj = AssociationConditions.new(asso_conditions: conditions, parent_class: relationship.target_class, path: path_with_relationship(relationship))
+        asso_conditions_obj = AssociationConditions.new(asso_conditions: conditions, parent_class: relationship.target_class, path: path_with_relationship(relationship, rel_length))
         append_and_to_conditions_string
         @conditions_string += asso_conditions_obj.conditions_string
         @cypher_matches += asso_conditions_obj.cypher_matches
@@ -68,8 +68,9 @@ module CanCanCan
         @conditions_string += con_string
       end
 
-      def path_with_relationship(relationship)
-        @options[:path] + relationship.arrow_cypher + '()'
+      def path_with_relationship(relationship, rel_length)
+        arrow_cypher = relationship.arrow_cypher(nil, {}, false, false, rel_length)
+        @options[:path] + arrow_cypher + '()'
       end
     end
   end

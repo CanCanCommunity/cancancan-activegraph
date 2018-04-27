@@ -78,6 +78,7 @@ module CanCan
       def records_for_multiple_rules
         base_query = base_query_proxy.query
         cypher_options = construct_cypher_options
+        cypher_options[:matches].reject! { |mt| mt.match(var_name(@model_class)) }
         match_string = cypher_options[:matches].uniq.join(', ')
         base_query = base_query.match(match_string) unless match_string.blank?
         base_query
