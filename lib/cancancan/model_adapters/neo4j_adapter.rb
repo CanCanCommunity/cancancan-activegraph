@@ -65,7 +65,8 @@ module CanCan
       def self.associations_conditions_match?(conditions, subject, base_class)
         return true if conditions.blank?
         conditions.all? do |association, conditions_hash|
-          current_subject = subject.send(association)
+          rel_length = conditions_hash.delete(:rel_length)
+          current_subject = subject.send(association, rel_length: rel_length)
           return false unless current_subject
           current_model = base_class.associations[association].target_class
           all_conditions_match?(current_subject, conditions_hash, current_model)
