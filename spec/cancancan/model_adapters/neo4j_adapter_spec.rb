@@ -449,6 +449,19 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
         expect(User.accessible_by(ability)).to contain_exactly(active_user)
         expect(ability).to be_able_to(:read, active_user)
       end
+
+      it 'fetches all variable length realtion nodes with nested relation conditions' do
+        active_user = User.create!(name: 'Chunky-2', status: 'active')
+        inactive_user = User.create!(name: 'Chunky-1', friends: [active_user])
+        user = User.create!(name: 'Chunky', friends: [inactive_user])
+        active_user.articles = [Article.create!(published: true)]
+        ability = Ability.new(user)
+        ability.can :read, User, friends: { status: 'active',
+                                            rel_length: { min: 0 },
+                                            articles: { published: true } }
+        expect(User.accessible_by(ability)).to contain_exactly(active_user)
+        expect(ability).to be_able_to(:read, active_user)
+      end
     end
 
     # TODO: Fix code to pass this

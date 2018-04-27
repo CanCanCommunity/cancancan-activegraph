@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.2.1
+
+Fixing in case the variable length is specified on association and that association also has asssociation conditions, the variable lenght association condition was not working.
+
 ## 1.2.0
 
 Fixing Issue#4 - ability to specify variable length relation in conditions hash of a rule.
