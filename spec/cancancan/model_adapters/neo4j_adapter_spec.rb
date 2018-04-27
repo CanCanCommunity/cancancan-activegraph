@@ -119,7 +119,7 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
           context 'nested condition with 1st relation being has one' do
             before(:example) do
               @article2.user = @user
-              @ability.can :read, Article, user: {mentions: {active: true} }
+              @ability.can :read, Article, user: { mentions: { active: true } }
             end
             include_context 'match expectations'
           end
@@ -435,6 +435,19 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
         table_z = Namespace::TableZ.create(user: user)
         table_x.table_zs << table_z
         expect(Namespace::TableX.accessible_by(ability)).to eq([table_x])
+      end
+    end
+
+    context ' condition with variable length relation' do
+      it 'fetches all variable length realtion nodes with conditions' do
+        active_user = User.create!(name: 'Chunky-2', status: 'active')
+        inactive_user = User.create!(name: 'Chunky-1', friends: [active_user])
+        user = User.create!(name: 'Chunky', friends: [inactive_user])
+        ability = Ability.new(user)
+        ability.can :read, User, friends: { status: 'active',
+                                            rel_length: { min: 0 } }
+        expect(User.accessible_by(ability)).to contain_exactly(active_user)
+        expect(ability).to be_able_to(:read, active_user)
       end
     end
 

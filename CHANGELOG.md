@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.2.0
+
+Fixing Issue#4 - ability to specify variable length relation in conditions hash of a rule.
+
 ## 1.0.3
 
 Fixing Issue#1 - undefined method error on object which does not have relation established, and the can rule containes conditions on that relation.

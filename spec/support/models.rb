@@ -45,9 +45,11 @@ end
 class User
   include Neo4j::ActiveNode
   property :name, type: String
+  property :status, type: String
 
   has_many :in, :articles, origin: :user
   has_many :in, :mentions, origin: :user
+  has_many :out, :friends, type: :friend, model_class: self
 end
 
 module Namespace
