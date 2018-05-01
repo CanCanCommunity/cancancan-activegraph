@@ -41,9 +41,8 @@ module CanCanCan
         model_attr_exists = model_conditions.any? do |key, _|
           !target_class.associations_keys.include?(key)
         end
-        end_node = model_attr_exists ? CypherConstructorHelper.match_node_cypher(target_class) : '()'
-        arrow_cypher = relationship.arrow_cypher(nil, {}, false, false, rel_length)
-        current_path = @options[:path] + arrow_cypher + end_node
+        to_node = CypherConstructorHelper.match_node_cypher(target_class) if model_attr_exists
+        current_path = path_with_relationship(relationship, rel_length, to_node)
         if model_attr_exists
           append_matches(relationship)
           append_and_to_conditions_string
@@ -68,9 +67,10 @@ module CanCanCan
         @conditions_string += con_string
       end
 
-      def path_with_relationship(relationship, rel_length)
+      def path_with_relationship(relationship, rel_length, to_node = nil)
         arrow_cypher = relationship.arrow_cypher(nil, {}, false, false, rel_length)
-        @options[:path] + arrow_cypher + '()'
+        to_node_label = CypherConstructorHelper.path_end_node(relationship)
+        @options[:path] + arrow_cypher + (to_node || to_node_label)
       end
     end
   end

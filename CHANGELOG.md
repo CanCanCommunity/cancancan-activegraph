@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.2.2
+
+Adding label in relation path end node. eg. changing MATCH (article:Article) WHERE (( NOT (article:Article)-[:mention]->()-[:user]->()))' to MATCH (article:Article) WHERE (( NOT (article:Article)-[:mention]->(:Mention)-[:user]->(:User)))'
+
 ## 1.2.1
 
 Fixing in case the variable length is specified on association and that association also has asssociation conditions, the variable lenght association condition was not working.
