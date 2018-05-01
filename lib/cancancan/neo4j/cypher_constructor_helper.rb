@@ -35,7 +35,8 @@ module CanCanCan
 
         def condtion_for_path(path:, variable_name:, base_class:, key:)
           path = "(#{variable_name})" if path.blank?
-          path + base_class.associations[key].arrow_cypher + '()'
+          relationship = base_class.associations[key]
+          path + relationship.arrow_cypher + path_end_node(relationship)
         end
 
         def condition_for_id(base_class, variable_name, value)
@@ -64,6 +65,10 @@ module CanCanCan
                       end
           connector += 'NOT' if rule_cypher.append_not_to_conditions?
           cypher_options[:conditions] = conditions_string + connector
+        end
+
+        def path_end_node(relationship)
+          '(' + relationship.target_class.mapped_label_names.map { |label_name| ":`#{label_name}`" }.join + ')'
         end
       end
     end

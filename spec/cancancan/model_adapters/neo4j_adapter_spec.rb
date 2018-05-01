@@ -438,7 +438,7 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
       end
     end
 
-    context ' condition with variable length relation' do
+    context 'condition with variable length relation' do
       it 'fetches all variable length realtion nodes with conditions' do
         active_user = User.create!(name: 'Chunky-2', status: 'active')
         inactive_user = User.create!(name: 'Chunky-1', friends: [active_user])
@@ -461,6 +461,16 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
                                             articles: { published: true } }
         expect(User.accessible_by(ability)).to contain_exactly(active_user)
         expect(ability).to be_able_to(:read, active_user)
+      end
+    end
+
+    context 'condition on association' do
+      it 'constructs correct cypher with association node lable' do
+        @ability.can :read, Article, mentions: { user: nil }
+        expect(Article.accessible_by(@ability).to_cypher).to eq(
+          'MATCH (article:`Article`) WHERE (( NOT (article:`Article`)-'\
+          '[:`mention`]->(:`Mention`)-[:`user`]->(:`User`)))')
+
       end
     end
 
