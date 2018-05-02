@@ -1,3 +1,4 @@
+require 'active_support'
 require 'cancancan'
 require 'neo4j'
 

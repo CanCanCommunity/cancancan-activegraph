@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_dependency 'activemodel', '<5.2.0'
-  spec.add_dependency 'cancancan', '<=2.1.4'
+  spec.add_dependency 'cancancan'
   spec.add_dependency 'neo4j', '>= 9.0.0'
 
   spec.add_development_dependency 'bundler', '>= 1.3'
