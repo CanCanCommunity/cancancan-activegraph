@@ -18,7 +18,6 @@ Gem::Specification.new do |spec|
   spec.files         = `git ls-files lib init.rb cancancan-neo4j.gemspec`.split($INPUT_RECORD_SEPARATOR)
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'activemodel', '<5.2.0'
   spec.add_dependency 'cancancan'
   spec.add_dependency 'neo4j', '>= 9.0.0'
 
