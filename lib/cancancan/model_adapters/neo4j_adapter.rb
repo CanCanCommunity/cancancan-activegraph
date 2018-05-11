@@ -1,5 +1,6 @@
 require 'cancancan/neo4j/cypher_constructor_helper'
 require 'cancancan/neo4j/rule_cypher'
+require 'cancancan/neo4j/cypher_constructor'
 
 module CanCan
   module ModelAdapters
@@ -76,31 +77,20 @@ module CanCan
       private
 
       def records_for_multiple_rules
-        base_query = base_query_proxy.query
-        cypher_options = construct_cypher_options
-        cypher_options[:matches].reject! { |mt| mt.match(var_name(@model_class)) }
-        match_string = cypher_options[:matches].uniq.join(', ')
-        base_query = base_query.match(match_string) unless match_string.blank?
-        base_query
-          .proxy_as(@model_class, var_name(@model_class))
-          .where(cypher_options[:conditions])
+        query = CanCanCan::Neo4j::CypherConstructor.new(construct_cypher_options).query
+        query_proxy = query.proxy_as(@model_class, var_name)
+        empty_result_set?(query_proxy) ? @model_class.where('false') : query_proxy
       end
 
       def construct_cypher_options
-        default_options = { conditions: '', matches: [] }
-        @rules.reverse.each_with_object(default_options) do |rule, options|
-          rule_options = { rule: rule, model_class: @model_class }
-          rule_cypher = CanCanCan::Neo4j::RuleCypher.new(rule_options)
-          CanCanCan::Neo4j::CypherConstructorHelper
-            .append_and_or_to_conditions(options, rule_cypher)
-          options[:conditions] += ('(' + rule_cypher.rule_conditions + ')')
-          options[:matches] += rule_cypher.cypher_matches
-          options
+        @rules.reverse.collect.with_index do |rule, index|
+          opts = { rule: rule, model_class: @model_class, index: index }
+          CanCanCan::Neo4j::RuleCypher.new(opts)
         end
       end
 
-      def base_query_proxy
-        @model_class.as(var_name(@model_class))
+      def empty_result_set?(query_proxy)
+        query_proxy.limit(1).count == 0
       end
 
       def override_scope
@@ -117,8 +107,8 @@ module CanCan
               "Instead use a hash for #{rule_found.actions.first} #{rule_found.subjects.first} ability."
       end
 
-      def var_name(model_class)
-        CanCanCan::Neo4j::CypherConstructorHelper.var_name(model_class)
+      def var_name
+        CanCanCan::Neo4j::CypherConstructorHelper.var_name(@model_class)
       end
     end
   end
