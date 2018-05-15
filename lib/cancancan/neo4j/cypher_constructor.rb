@@ -7,24 +7,32 @@ module CanCanCan
       attr_reader :query
 
       def initialize(rule_cyphers)
-        @query = rule_cyphers.first.options[:model_class].new_query
+        @model_class = rule_cyphers.first.options[:model_class]
+        reset_variables
         construct_cypher(rule_cyphers)
       end
 
-      def construct_cypher(rule_cyphers)
-        rule_cyphers.each_with_index do |rule_cypher, index|
-          if rule_cypher.options[:rule].base_behavior
-            construct_can_cypher(rule_cypher, index)
-          else
-            construct_cannot_cypher(rule_cypher, index)
-          end
-        end
-        unwind_query_with_distinct(rule_cyphers.first.options[:model_class])
+      def reset_variables
+        @query = @model_class.new_query
+        @current_collection = nil
       end
 
-      def unwind_query_with_distinct(model_class)
-        var = CanCanCan::Neo4j::CypherConstructorHelper.var_name(model_class)
-        @query = unwind_qeury("#{var}_can")       
+      def construct_cypher(rule_cyphers)
+        rule_cyphers.each do |rule_cypher|
+          rule = rule_cypher.options[:rule]
+          reset_variables if rule.conditions.blank?
+          if rule.base_behavior
+            construct_can_cypher(rule_cypher)
+          else
+            construct_cannot_cypher(rule_cypher)
+          end
+        end
+        unwind_query_with_distinct
+      end
+
+      def unwind_query_with_distinct
+        var = CanCanCan::Neo4j::CypherConstructorHelper.var_name(@model_class)
+        @query = unwind_qeury("#{var}_can")
                  .with("DISTINCT #{var}_can as #{var}")
       end
 
@@ -32,28 +40,30 @@ module CanCanCan
         @query = @query.unwind("#{@current_collection} as #{var_name}")
       end
 
-      def construct_can_cypher(rule_cypher, index)
-        with_clause = with_clause_for_rule(rule_cypher, index, true)
+      def construct_can_cypher(rule_cypher)
+        with_clause = with_clause_for_rule(rule_cypher, true)
         @query = @query.optional_match(rule_cypher.path)
                        .where(rule_cypher.rule_conditions)
                        .with(with_clause)
       end
 
-      def with_clause_for_rule(rule_cypher, index, can_rule)
+      def with_clause_for_rule(rule_cypher, can_rule)
         var = rule_cypher.options[:var_label]
         with = "collect(DISTINCT #{var}) as #{var}_col"
-        with = @current_collection + ' + ' + with if can_rule && @current_collection
+        if can_rule && @current_collection
+          with = @current_collection + ' + ' + with
+        end
         @current_collection = "#{var}_col"
         with
       end
 
-      def construct_cannot_cypher(rule_cypher, index)
+      def construct_cannot_cypher(rule_cypher)
         match_cls = match_clause(rule_cypher)
         unwind_for_cannot(rule_cypher)
         @query = @query.break
                        .match(match_cls)
                        .where_not(rule_cypher.rule_conditions)
-        with_claus = with_clause_for_rule(rule_cypher, index, false)
+        with_claus = with_clause_for_rule(rule_cypher, false)
         @query = @query.with(with_claus)
       end
 
@@ -65,8 +75,8 @@ module CanCanCan
       end
 
       def match_clause(rule_cypher)
-         var = rule_cypher.options[:var_label]
-         @current_collection.present? ? "(#{var})" : rule_cypher.path
+        var = rule_cypher.options[:var_label]
+        @current_collection.present? ? "(#{var})" : rule_cypher.path
       end
     end
   end

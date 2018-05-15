@@ -470,6 +470,18 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
       end
     end
 
+    context 'mupltile can rules with one without conditions' do
+      it 'constructs correct cypher with condition for all records' do 
+        @ability.can :read, Article, mentions: { user: nil }
+        @ability.can :read, Article
+        expect(Article.accessible_by(@ability).to_cypher).to include(
+          'OPTIONAL MATCH (article_2:`Article`) WHERE (true) WITH'\
+          ' collect(DISTINCT article_2) as article_2_col UNWIND article_2_col'\
+          ' as article_can WITH DISTINCT article_can as article'
+        )
+      end
+    end
+
     # TODO: Fix code to pass this
     # it 'fetches only associated records when using with a scope for conditions' do
     #   @ability.can :read, Article, Article.where(secret: true)
