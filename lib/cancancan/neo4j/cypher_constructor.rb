@@ -1,5 +1,4 @@
 require 'cancancan/neo4j/cypher_constructor_helper'
-require 'cancancan/neo4j/association_conditions'
 
 module CanCanCan
   module Neo4j
