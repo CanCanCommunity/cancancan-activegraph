@@ -80,6 +80,7 @@ module CanCan
         query = CanCanCan::Neo4j::CypherConstructor.new(construct_cypher_options).query
         query_proxy = query.proxy_as(@model_class, var_name)
         empty_result_set?(query_proxy) ? @model_class.where('false') : query_proxy
+        query_proxy
       end
 
       def construct_cypher_options

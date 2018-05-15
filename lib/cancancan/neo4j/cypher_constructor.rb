@@ -25,8 +25,12 @@ module CanCanCan
 
       def unwind_query_with_distinct(model_class)
         var = CanCanCan::Neo4j::CypherConstructorHelper.var_name(model_class)
-        @query = @query.unwind("#{@current_collection} as #{var}_can")
-                       .with("DISTINCT #{var}_can as #{var}")
+        @query = unwind_qeury("#{var}_can")       
+                 .with("DISTINCT #{var}_can as #{var}")
+      end
+
+      def unwind_qeury(var_name)
+        @query = @query.unwind("#{@current_collection} as #{var_name}")
       end
 
       def construct_can_cypher(rule_cypher, index)
@@ -45,12 +49,25 @@ module CanCanCan
       end
 
       def construct_cannot_cypher(rule_cypher, index)
-        var = rule_cypher.options[:var_label]
-        @query = @query.match(rule_cypher.path)
+        match_cls = match_clause(rule_cypher)
+        unwind_for_cannot(rule_cypher)
+        @query = @query.break
+                       .match(match_cls)
                        .where_not(rule_cypher.rule_conditions)
-        @query = @query.where("#{var} IN #{@current_collection}") if @current_collection
         with_claus = with_clause_for_rule(rule_cypher, index, false)
         @query = @query.with(with_claus)
+      end
+
+      def unwind_for_cannot(rule_cypher)
+        return unless @current_collection.present?
+        var = rule_cypher.options[:var_label]
+        @query = unwind_qeury(var)
+                 .with("DISTINCT #{var} as #{var}")
+      end
+
+      def match_clause(rule_cypher)
+         var = rule_cypher.options[:var_label]
+         @current_collection.present? ? "(#{var})" : rule_cypher.path
       end
     end
   end
