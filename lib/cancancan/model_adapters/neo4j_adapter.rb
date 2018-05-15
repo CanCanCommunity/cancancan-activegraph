@@ -25,62 +25,39 @@ module CanCan
         base_class = subject.class
         all_conditions_match?(subject, conditions, base_class)
       end
-
+      
       def self.all_conditions_match?(subject, conditions, base_class)
-        asso_conditions, model_conditions = CanCanCan::Neo4j::CypherConstructorHelper
-                                            .bifurcate_conditions(conditions)
-        associations_conditions_match?(asso_conditions, subject, base_class) &&
-          model_conditions_matches?(model_conditions, subject, base_class)
-      end
-
-      def self.model_conditions_matches?(conditions, subject, base_class)
-        return true if conditions.blank?
-        conditions = conditions.partition do |key, _|
-          base_class.associations_keys.include?(key)
-        end
-        associations_conditions, atrribute_conditions = conditions.map(&:to_h)
-        matches_attribute_conditions?(atrribute_conditions, subject) &&
-          matches_associations_relations(associations_conditions, subject)
-      end
-
-      # checks if associations exists on given node
-      def self.matches_associations_relations(conditions, subject)
-        return true if conditions.blank?
-        conditions.all? do |association, value|
-          association_exists = subject.send(association).exists?
-          value ? association_exists : !association_exists
-        end
-      end
-
-      def self.matches_attribute_conditions?(conditions, subject)
-        return true if conditions.blank?
-        if subject.is_a?(Neo4j::ActiveNode::HasN::AssociationProxy)
-          subject.where(conditions).exists?
-        else
-          conditions.all? do |attribute, value|
-            subject.send(attribute) == value
+        return false unless subject
+        conditions.all? do |key, value|
+          if (relation = base_class.associations[key])
+            match_relation_conditions(value, subject, relation)
+          else
+            property_matches?(subject, key, value)
           end
         end
       end
 
-      def self.associations_conditions_match?(conditions, subject, base_class)
-        return true if conditions.blank?
-        conditions.all? do |association, conditions_hash|
-          rel_length = conditions_hash.delete(:rel_length)
-          current_subject = subject.send(association, rel_length: rel_length)
-          return false unless current_subject
-          current_model = base_class.associations[association].target_class
-          all_conditions_match?(current_subject, conditions_hash, current_model)
+      def self.property_matches?(subject, property, value)
+        if subject.is_a?(Neo4j::ActiveNode::HasN::AssociationProxy)
+          subject.where(property => value).exists?
+        else
+          subject.send(property) == value
         end
+      end
+
+      def self.match_relation_conditions(conditions, subject, association)
+        rel_length = conditions.delete(:rel_length) if conditions.is_a?(Hash)
+        subject = subject.send(association.name, rel_length: rel_length)
+        return !subject.exists? if conditions.blank? || conditions.is_a?(FalseClass)
+        return subject.exists? if conditions.is_a?(TrueClass)
+        all_conditions_match?(subject, conditions, association.target_class)
       end
 
       private
 
       def records_for_multiple_rules
         query = CanCanCan::Neo4j::CypherConstructor.new(construct_cypher_options).query
-        query_proxy = query.proxy_as(@model_class, var_name)
-        empty_result_set?(query_proxy) ? @model_class.where('false') : query_proxy
-        query_proxy
+        query.proxy_as(@model_class, var_name)
       end
 
       def construct_cypher_options
@@ -88,10 +65,6 @@ module CanCan
           opts = { rule: rule, model_class: @model_class, index: index }
           CanCanCan::Neo4j::RuleCypher.new(opts)
         end
-      end
-
-      def empty_result_set?(query_proxy)
-        query_proxy.limit(1).count == 0
       end
 
       def override_scope
