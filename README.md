@@ -18,7 +18,20 @@ gem 'cancancan-neo4j'
 ```
 
 ```ruby
-can :read, Article, author: { name: 'Chunky' }
+can :read, Article, author: { id: user.id }
 ```
 
-Here name is a property on Author and Article has 'has_one' relation with Author.
+Here `id` is a property on `Author` and `Article` has `has_one` relation with `Author`.
+
+```ruby
+can :read, User, friends: { rel_length: {min: 1, max: 2} id: user.id }
+```
+
+Here all the one and two level deep friends of the user will be accessible.
+
+
+```ruby
+can :read, User, friends: false
+```
+
+Here all the users who don't have friends will be returned.

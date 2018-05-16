@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.3.0
+
+Removed `active_model` version dependency of `<5.2.0`
+Fixed `cancancan` version dependecy of `<=2.1.4`
+Fixed Issue #10 - Improved Cypher peroformance
+
 ## 1.2.2
 
 Adding label in relation path end node. eg. changing MATCH (article:Article) WHERE (( NOT (article:Article)-[:mention]->()-[:user]->()))' to MATCH (article:Article) WHERE (( NOT (article:Article)-[:mention]->(:Mention)-[:user]->(:User)))'
