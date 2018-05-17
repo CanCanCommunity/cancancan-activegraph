@@ -349,7 +349,7 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
     it 'returns cypher for single `can` rule and default `cannot` rule' do
       Article.create!(published: false, secret: true)
       @ability.cannot :read, Article
-      @ability.can :read, Article, {published: false, secret: true}
+      @ability.can :read, Article, published: false, secret: true
       cypher_string = 'WHERE NOT(false)'
       expect(@ability.model_adapter(Article, :read).database_records.to_cypher)
         .to include(cypher_string)
@@ -409,7 +409,7 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
       @ability.can :manage, Article, name: 'Chunky'
       @ability.can :update, Article, published: true
       @ability.cannot :update, Article, secret: true
-      cypher_string = "WHERE (article_1.name = {article_1_name})"
+      cypher_string = 'WHERE (article_1.name = {article_1_name})'
       subject1 = @ability.model_adapter(Article, :update)
                          .database_records.to_cypher
       expect(subject1).to include(cypher_string)
@@ -442,7 +442,9 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
         ability = Ability.new(user)
         ability.can :read, User, friends: { status: 'active',
                                             rel_length: { min: 0 } }
-        expect(User.accessible_by(ability)).to contain_exactly(user, inactive_user, active_user)
+        expect(User.accessible_by(ability)).to contain_exactly(
+          user, inactive_user, active_user
+        )
         expect(ability).to be_able_to(:read, user)
       end
 
@@ -454,7 +456,9 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
         ability = Ability.new(user)
         ability.can :read, User, friends: { rel_length: { min: 0 },
                                             articles: { published: true } }
-        expect(User.accessible_by(ability)).to contain_exactly(user, inactive_user, active_user)
+        expect(User.accessible_by(ability)).to contain_exactly(
+          user, inactive_user, active_user
+        )
         expect(ability).to be_able_to(:read, active_user)
       end
     end
@@ -471,7 +475,7 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
     end
 
     context 'mupltile can rules with one without conditions' do
-      it 'constructs correct cypher with condition for all records' do 
+      it 'constructs correct cypher with condition for all records' do
         @ability.can :read, Article, mentions: { user: nil }
         @ability.can :read, Article
         expect(Article.accessible_by(@ability).to_cypher).to include(
