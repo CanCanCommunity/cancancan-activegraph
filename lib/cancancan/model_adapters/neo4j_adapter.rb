@@ -25,7 +25,7 @@ module CanCan
         base_class = subject.class
         all_conditions_match?(subject, conditions, base_class)
       end
-      
+
       def self.all_conditions_match?(subject, conditions, base_class)
         return false unless subject
         conditions.all? do |key, value|
@@ -48,15 +48,17 @@ module CanCan
       def self.match_relation_conditions(conditions, subject, association)
         rel_length = conditions.delete(:rel_length) if conditions.is_a?(Hash)
         subject = subject.send(association.name, rel_length: rel_length)
-        return !subject.exists? if conditions.blank? || conditions.is_a?(FalseClass)
-        return subject.exists? if conditions.is_a?(TrueClass)
+        return !subject.exists? if conditions.blank?
+        return subject.exists? if conditions == true
         all_conditions_match?(subject, conditions, association.target_class)
       end
 
       private
 
       def records_for_multiple_rules
-        query = CanCanCan::Neo4j::CypherConstructor.new(construct_cypher_options).query
+        query = CanCanCan::Neo4j::CypherConstructor.new(
+          construct_cypher_options
+        ).query
         query.proxy_as(@model_class, var_name)
       end
 
@@ -69,16 +71,21 @@ module CanCan
 
       def override_scope
         conditions = @rules.map(&:conditions).compact
-        return unless conditions.any? { |condition| condition.is_a?(Neo4j::ActiveNode::Query::QueryProxy) }
+        return unless conditions.any? do |condition|
+          condition.is_a?(Neo4j::ActiveNode::Query::QueryProxy)
+        end
         return conditions.first if conditions.size == 1
         raise_override_scope_error
       end
 
       def raise_override_scope_error
-        rule_found = @rules.detect { |rule| rule.conditions.is_a?(Neo4j::ActiveNode::Query::QueryProxy) }
+        rule_found = @rules.detect do |rule|
+          rule.conditions.is_a?(Neo4j::ActiveNode::Query::QueryProxy)
+        end
         raise Error,
               'Unable to merge an ActiveNode scope with other conditions. '\
-              "Instead use a hash for #{rule_found.actions.first} #{rule_found.subjects.first} ability."
+              "Instead use a hash for #{rule_found.actions.first}"\
+              " #{rule_found.subjects.first} ability."
       end
 
       def var_name

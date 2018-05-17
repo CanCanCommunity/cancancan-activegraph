@@ -47,27 +47,35 @@ module CanCanCan
 
       def hash_cypher_options(key, conditions, base_class)
         if (rel = base_class.associations[key])
-          rel_length = conditions.delete(:rel_length) if conditions
-          arrow_cypher = rel.arrow_cypher(nil, {}, false, false, rel_length)
-          node_label = CypherConstructorHelper.path_end_node(rel, conditions)
-          @path += (arrow_cypher + node_label)
+          update_path_with_rel(conditions, rel)
           cypher_for_relation_conditions(conditions, rel)
         else
           merge_conditions(key, conditions, base_class)
         end
       end
 
+      def update_path_with_rel(conditions, rel)
+        rel_length = conditions.delete(:rel_length) if conditions
+        arrow_cypher = rel.arrow_cypher(nil, {}, false, false, rel_length)
+        node_label = CypherConstructorHelper.path_end_node(rel, conditions)
+        @path += (arrow_cypher + node_label)
+      end
+
       def cypher_for_relation_conditions(conditions, relationship)
         con_calss = conditions.class
         if conditions.blank? || [TrueClass, FalseClass].include?(con_calss)
-          not_str = conditions ? '' : 'NOT '
-          @rule_conditions = not_str + @path
-          initialize_path
+          update_conditions_with_path(conditions)
         else
           conditions.each do |key, con|
             hash_cypher_options(key, con, relationship.target_class)
           end
         end
+      end
+
+      def update_conditions_with_path(path_exists)
+        not_str = path_exists ? '' : 'NOT '
+        @rule_conditions = not_str + @path
+        initialize_path
       end
 
       def merge_conditions(key, value, base_class)
@@ -80,7 +88,8 @@ module CanCanCan
       end
 
       def var_label_for_conditions(base_class, key)
-        return @options[:var_label] if @options[:rule].conditions.keys.include?(key)
+        condition_keys = @options[:rule].conditions.keys
+        return @options[:var_label] if condition_keys.include?(key)
         CypherConstructorHelper.var_name(base_class)
       end
 
