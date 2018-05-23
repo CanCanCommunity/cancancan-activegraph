@@ -51,7 +51,7 @@ module CanCanCan
         var = rule_cypher.options[:var_label]
         with = "collect(DISTINCT #{var}) as #{var}_col"
         if can_rule && @current_collection
-          with = @current_collection + ' + ' + with
+          with = "#{@current_collection} + #{with}"
         end
         @current_collection = "#{var}_col"
         with
