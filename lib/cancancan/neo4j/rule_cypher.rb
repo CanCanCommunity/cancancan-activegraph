@@ -62,18 +62,16 @@ module CanCanCan
       end
 
       def cypher_for_relation_conditions(conditions, relationship)
-        con_calss = conditions.class
-        if conditions.blank? || [TrueClass, FalseClass].include?(con_calss)
-          update_conditions_with_path(conditions)
-        else
+        if conditions.is_a?(Hash)
           conditions.each do |key, con|
             hash_cypher_options(key, con, relationship.target_class)
           end
+        else
+          update_conditions_with_path(conditions ? '' : 'NOT ')
         end
       end
 
-      def update_conditions_with_path(path_exists)
-        not_str = path_exists ? '' : 'NOT '
+      def update_conditions_with_path(not_str)
         @rule_conditions = not_str + @path
         initialize_path
       end
