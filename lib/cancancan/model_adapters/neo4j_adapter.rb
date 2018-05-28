@@ -56,9 +56,10 @@ module CanCan
       private
 
       def records_for_multiple_rules
-        CanCanCan::Neo4j::CypherConstructor.new( construct_cypher_options)
-                                           .query
-                                           .proxy_as(@model_class, var_name)
+        CanCanCan::Neo4j::CypherConstructor
+          .new(construct_cypher_options)
+          .query
+          .proxy_as(@model_class, var_name)
       end
 
       def construct_cypher_options
