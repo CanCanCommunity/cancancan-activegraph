@@ -1,33 +1,32 @@
 require 'cancancan/neo4j/cypher_constructor_helper'
-require 'cancancan/neo4j/association_conditions'
 
 module CanCanCan
   module Neo4j
     # Constructs cypher conditions for rule and cypher match classes
     class RuleCypher
-      attr_reader :rule_conditions, :cypher_matches
+      attr_reader :rule_conditions, :path, :options
 
       def initialize(options)
         @options = options
-        @rule_conditions = ''
-        @cypher_matches = []
+        @rule_conditions = {}
+        initialize_path
         construct_cypher_conditions
+      end
+
+      def initialize_path
+        model_class = @options[:model_class]
+        var_label = CypherConstructorHelper.var_name(model_class)
+        var_label += ('_' + (@options[:index] + 1).to_s)
+        @options[:var_label] = var_label
+        @path = CypherConstructorHelper.path_node(model_class, var_label)
       end
 
       def construct_cypher_conditions
         if @options[:rule].conditions.blank?
           condition_for_rule_without_conditions
         else
-          set_cypher_options
+          construct_cypher_options
         end
-      end
-
-      def conditions_connector
-        @options[:rule].base_behavior ? ' OR ' : ' AND '
-      end
-
-      def append_not_to_conditions?
-        !rule_conditions_blank? && !@options[:rule].base_behavior
       end
 
       private
@@ -40,23 +39,65 @@ module CanCanCan
         @rule_conditions = @options[:rule].base_behavior ? '(true)' : '(false)'
       end
 
-      def set_cypher_options
-        associations_conditions, model_conditions = CypherConstructorHelper.bifurcate_conditions(@options[:rule].conditions)
-        @rule_conditions = CypherConstructorHelper.construct_conditions_string(model_conditions, @options[:model_class], default_path) unless model_conditions.blank?
-        return if associations_conditions.blank?
-        append_association_conditions(associations_conditions)
+      def construct_cypher_options
+        @options[:rule].conditions.deep_dup.each do |key, conditions|
+          hash_cypher_options(key, conditions, @options[:model_class])
+        end
       end
 
-      def append_association_conditions(conditions_hash)
-        options = { asso_conditions: conditions_hash, parent_class: @options[:model_class], path: default_path }
-        asso_conditions_obj = AssociationConditions.new(options)
-        @rule_conditions += ' AND ' unless @rule_conditions.blank?
-        @rule_conditions += asso_conditions_obj.conditions_string
-        @cypher_matches += asso_conditions_obj.cypher_matches
+      def hash_cypher_options(key, conditions, base_class)
+        if (rel = base_class.associations[key])
+          update_path_with_rel(conditions, rel)
+          cypher_for_relation_conditions(conditions, rel)
+        else
+          merge_conditions(key, conditions, base_class)
+        end
       end
 
-      def default_path
-        CypherConstructorHelper.match_node_cypher(@options[:model_class])
+      def update_path_with_rel(conditions, rel)
+        rel_length = conditions.delete(:rel_length) if conditions
+        arrow_cypher = rel.arrow_cypher(nil, {}, false, false, rel_length)
+        node_label = CypherConstructorHelper.path_end_node(rel, conditions)
+        @path += (arrow_cypher + node_label)
+      end
+
+      def cypher_for_relation_conditions(conditions, relationship)
+        if conditions.is_a?(Hash)
+          conditions.each do |key, con|
+            hash_cypher_options(key, con, relationship.target_class)
+          end
+        else
+          update_conditions_with_path(conditions ? '' : 'NOT ')
+        end
+      end
+
+      def update_conditions_with_path(not_str)
+        @rule_conditions = not_str + @path
+        initialize_path
+      end
+
+      def merge_conditions(key, value, base_class)
+        var_name = var_label_for_conditions(base_class, key)
+        if key == :id
+          merge_condition_for_id(var_name, base_class, value)
+        else
+          (@rule_conditions[var_name] ||= {}).merge!(key => value)
+        end
+      end
+
+      def var_label_for_conditions(base_class, key)
+        condition_keys = @options[:rule].conditions.keys
+        return @options[:var_label] if condition_keys.include?(key)
+        CypherConstructorHelper.var_name(base_class)
+      end
+
+      def merge_condition_for_id(var_name, base_class, value)
+        id_property_name = base_class.id_property_name
+        if id_property_name == :neo_id
+          @rule_conditions.merge!("ID(#{var_name})" => value)
+        else
+          (@rule_conditions[var_name] ||= {}).merge!(id_property_name => value)
+        end
       end
     end
   end
