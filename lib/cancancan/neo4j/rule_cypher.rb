@@ -22,7 +22,11 @@ module CanCanCan
       end
 
       def construct_cypher_conditions
-        if @options[:rule].conditions.blank?
+        conditions = @options[:rule].conditions
+        if conditions.is_a?(::Neo4j::ActiveNode::Query::QueryProxy)
+          return @options[:scope] = conditions
+        end
+        if conditions.blank?
           condition_for_rule_without_conditions
         else
           construct_cypher_options

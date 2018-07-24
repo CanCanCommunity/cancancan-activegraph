@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.3.1
+
+Fixing Issue#12 - Authorizing single resource for a scope based rule
+
 ## 1.3.0
 
 Removed `active_model` version dependency of `<5.2.0`

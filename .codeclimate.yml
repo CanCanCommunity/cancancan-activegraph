@@ -16,3 +16,4 @@ plugins:
     enabled: true
 exclude_patterns:
 - ".idea/"
+- "README.md"

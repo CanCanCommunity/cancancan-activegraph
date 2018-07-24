@@ -112,7 +112,7 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
           context 'nested condition with 1st relation being has one' do
             before(:example) do
               @article2.user = @user
-              @ability.can :read, Article, user: { mentions: { active: true } }
+              @ability.can :read, Article, user: { mentions: { id: @mention.id } }
             end
             include_context 'match expectations'
           end
@@ -308,8 +308,20 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
     it 'allows a scope for conditions' do
       @ability.can :read, Article, Article.where(secret: true)
       article1 = Article.create!(secret: true)
-      Article.create!(secret: false)
+      article2 = Article.create!(secret: false)
       expect(Article.accessible_by(@ability).to_a).to eq([article1])
+      expect(@ability).to be_able_to(:read, article1)
+      expect(@ability).not_to be_able_to(:read, article2)
+    end
+
+    it 'allows a scope for conditions with mupliple rules' do
+      @ability.can :read, Article, Article.where(secret: true)
+      @ability.can :read, Article
+      article1 = Article.create!(secret: true)
+      article2 = Article.create!(secret: false)
+      expect(Article.accessible_by(@ability).to_a).to contain_exactly(article1, article2)
+      expect(@ability).to be_able_to(:read, article1)
+      expect(@ability).to be_able_to(:read, article2)
     end
 
     it 'only reads comments for visible categories through articles' do

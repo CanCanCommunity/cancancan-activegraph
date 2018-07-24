@@ -4,7 +4,7 @@ module CanCanCan
   module Neo4j
     # Constructs cypher query from rule cypher options
     class CypherConstructor
-      attr_reader :query
+      attr_reader :query, :scope
 
       def initialize(rule_cyphers)
         @model_class = rule_cyphers.first.options[:model_class]
@@ -19,15 +19,24 @@ module CanCanCan
 
       def construct_cypher(rule_cyphers)
         rule_cyphers.each do |rule_cypher|
-          rule = rule_cypher.options[:rule]
-          reset_variables if rule.conditions.blank?
-          if rule.base_behavior
-            construct_can_cypher(rule_cypher)
-          else
-            construct_cannot_cypher(rule_cypher)
-          end
+          construct_cypher_for_rule(rule_cypher)
         end
         unwind_query_with_distinct
+      end
+
+      def construct_cypher_for_rule(rule_cypher)
+        rule = rule_cypher.options[:rule]
+        return if update_scope(rule_cypher)
+        reset_variables if rule.conditions.blank?
+        if rule.base_behavior
+          construct_can_cypher(rule_cypher)
+        else
+          construct_cannot_cypher(rule_cypher)
+        end
+      end
+
+      def update_scope(rule_cypher)
+        @scope = rule_cypher.options[:scope]
       end
 
       def unwind_query_with_distinct
