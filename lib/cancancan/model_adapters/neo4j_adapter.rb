@@ -74,7 +74,8 @@ module CanCan
         return unless conditions.any? do |condition|
           condition.is_a?(Neo4j::ActiveNode::Query::QueryProxy)
         end
-        return if conditions.size == 1 || conditions.select { |con| con.is_a?(Hash) && !con.empty? }.size == 0
+        return if conditions.size == 1
+        return if conditions.select { |cn| cn.is_a?(Hash) && !cn.empty? }.empty?
         raise_override_scope_error
       end
 
