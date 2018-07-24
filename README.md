@@ -41,6 +41,6 @@ To use scope with a rule, you can do folowing.
 can :read, User, User.where(active: true)
 ```
 
-You can use simple rules like `can :read, User` with rule with rule like above, but can not use rules with another scope and hash conditions. The order of rules also matter.
+You can use simple rules like `can :read, User` with rule like above, but can not use rules with another scope and hash conditions. The order of rules also matter.
 
 Check on specs for more usage.
