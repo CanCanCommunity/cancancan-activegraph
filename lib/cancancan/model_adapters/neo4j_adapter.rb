@@ -8,8 +8,7 @@ module CanCan
     class Neo4jAdapter < AbstractAdapter
       def database_records
         return @model_class.where('false') if @rules.empty?
-        rule = @rules.first
-        return rule.conditions if override_scope
+        override_scope
         records_for_multiple_rules.distinct
       end
 
@@ -56,10 +55,11 @@ module CanCan
       private
 
       def records_for_multiple_rules
-        CanCanCan::Neo4j::CypherConstructor
-          .new(construct_cypher_options)
-          .query
-          .proxy_as(@model_class, var_name)
+        con = CanCanCan::Neo4j::CypherConstructor.new(construct_cypher_options)
+        if (scope = con.scope)
+          return scope
+        end
+        con.query.proxy_as(@model_class, var_name)
       end
 
       def construct_cypher_options
@@ -74,7 +74,7 @@ module CanCan
         return unless conditions.any? do |condition|
           condition.is_a?(Neo4j::ActiveNode::Query::QueryProxy)
         end
-        return conditions.first if conditions.size == 1
+        return if conditions.size == 1 || conditions.select { |con| con.is_a?(Hash) && !con.empty? }.size == 0
         raise_override_scope_error
       end
 
