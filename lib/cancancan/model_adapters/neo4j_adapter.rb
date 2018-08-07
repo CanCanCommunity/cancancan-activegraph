@@ -57,8 +57,8 @@ module CanCan
       private
 
       def records_for_single_rule
-        rule = CanCanCan::Neo4j::SingleRuleCypher.new(@rules.first, @model_class)
-        rule.records
+        CanCanCan::Neo4j::SingleRuleCypher.new(@rules.first, @model_class)
+                                          .records
       end
 
       def records_for_multiple_rules

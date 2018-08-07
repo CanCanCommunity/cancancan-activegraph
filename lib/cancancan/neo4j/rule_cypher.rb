@@ -38,7 +38,7 @@ module CanCanCan
       def index_sub_str
         index = @options[:index]
         return '' unless index
-        ('_' + (@options[:index] + 1).to_s)
+        ('_' + (index + 1).to_s)
       end
 
       def rule_conditions_blank?
