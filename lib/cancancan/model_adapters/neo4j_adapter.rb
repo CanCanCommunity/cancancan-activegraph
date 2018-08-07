@@ -1,6 +1,7 @@
 require 'cancancan/neo4j/cypher_constructor_helper'
 require 'cancancan/neo4j/rule_cypher'
 require 'cancancan/neo4j/cypher_constructor'
+require 'cancancan/neo4j/single_rule_cypher'
 
 module CanCan
   module ModelAdapters
@@ -9,6 +10,7 @@ module CanCan
       def database_records
         return @model_class.where('false') if @rules.empty?
         override_scope
+        records_for_single_rule if @rules.size == 1
         records_for_multiple_rules.distinct
       end
 
@@ -53,6 +55,11 @@ module CanCan
       end
 
       private
+
+      def records_for_single_rule
+        rule = CanCanCan::Neo4j::SingleRuleCypher.new(@rules.first, @model_class)
+        rule.records
+      end
 
       def records_for_multiple_rules
         con = CanCanCan::Neo4j::CypherConstructor.new(construct_cypher_options)

@@ -16,7 +16,7 @@ module CanCanCan
       def initialize_path
         model_class = @options[:model_class]
         var_label = CypherConstructorHelper.var_name(model_class)
-        var_label += ('_' + (@options[:index] + 1).to_s)
+        var_label += index_sub_str
         @options[:var_label] = var_label
         @path = CypherConstructorHelper.path_node(model_class, var_label)
       end
@@ -34,6 +34,12 @@ module CanCanCan
       end
 
       private
+
+      def index_sub_str
+        index = @options[:index]
+        return '' unless index
+        ('_' + (@options[:index] + 1).to_s)
+      end
 
       def rule_conditions_blank?
         @options[:rule].conditions.blank?
