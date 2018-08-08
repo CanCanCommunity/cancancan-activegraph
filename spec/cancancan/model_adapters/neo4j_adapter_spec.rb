@@ -279,7 +279,7 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
 
     it 'should only read articles which are published with visible categories' do
       @ability.can :read, Article, published: true,
-                                   category: { visible: true }                                   
+                                   category: { visible: true }
       Article.create!(published: true)
       Article.create!(published: false)
       article3 = Article.create!(published: true,
