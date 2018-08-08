@@ -25,7 +25,7 @@ module CanCanCan
         def path_end_var(relationship, conditions)
           with_var = variable_in_path?(relationship, conditions)
           target_class = relationship.target_class
-          var_label = with_var ? var_name(target_class) : ''
+          with_var ? var_name(target_class) : ''
         end
       end
     end
