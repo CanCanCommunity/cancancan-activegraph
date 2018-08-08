@@ -67,8 +67,15 @@ module CanCanCan
       def update_path_with_rel(conditions, rel)
         rel_length = conditions.delete(:rel_length) if conditions
         arrow_cypher = rel.arrow_cypher(nil, {}, false, false, rel_length)
-        node_label = CypherConstructorHelper.path_end_node(rel, conditions)
+        node_label = path_end_node(rel, conditions)
         @path += (arrow_cypher + node_label)
+      end
+
+      def path_end_node(rel, conditions)
+        label = CypherConstructorHelper.path_end_var(rel, conditions)
+        label += '_01' if !label.blank? && @path.include?("#{label}:")
+        @options[:con_var_label] = label
+        CypherConstructorHelper.path_node(rel.target_class, label)
       end
 
       def cypher_for_relation_conditions(conditions, relationship)
@@ -87,7 +94,7 @@ module CanCanCan
       end
 
       def merge_conditions(key, value, base_class)
-        var_name = var_label_for_conditions(base_class, key)
+        var_name = var_label_for_conditions
         if key == :id
           merge_condition_for_id(var_name, base_class, value)
         else
@@ -95,10 +102,8 @@ module CanCanCan
         end
       end
 
-      def var_label_for_conditions(base_class, key)
-        condition_keys = @options[:rule].conditions.keys
-        return @options[:var_label] if condition_keys.include?(key)
-        CypherConstructorHelper.var_name(base_class)
+      def var_label_for_conditions
+        @options[:con_var_label] || @options[:var_label]
       end
 
       def merge_condition_for_id(var_name, base_class, value)

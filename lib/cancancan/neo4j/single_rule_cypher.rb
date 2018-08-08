@@ -35,6 +35,7 @@ module CanCanCan
                    .match(cypher.path)
                    .where(cypher.rule_conditions)
                    .proxy_as(model_class, var_lable)
+                   .distinct
       end
 
       def var_lable

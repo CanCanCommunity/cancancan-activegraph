@@ -10,7 +10,7 @@ module CanCan
       def database_records
         return @model_class.where('false') if @rules.empty?
         override_scope
-        records_for_single_rule if @rules.size == 1
+        return records_for_single_rule if @rules.size == 1
         records_for_multiple_rules.distinct
       end
 

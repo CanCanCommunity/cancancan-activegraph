@@ -278,8 +278,9 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
     end
 
     it 'should only read articles which are published with visible categories' do
-      @ability.can :read, Article, category: { visible: true },
-                                   published: true
+      @ability.can :read, Article, published: true,
+                                   category: { visible: true }
+                                   
       Article.create!(published: true)
       Article.create!(published: false)
       article3 = Article.create!(published: true,
@@ -427,7 +428,7 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
       expect(subject1).to include(cypher_string)
       subject2 = @ability.model_adapter(Article, :manage)
                          .database_records.to_cypher
-      expect(subject2).to include('(article_1.name =')
+      expect(subject2).to include('(article.name =')
       subject3 = @ability.model_adapter(Article, :read)
                          .database_records.to_cypher
       expect(subject3).to include('(true)')
@@ -479,8 +480,8 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
       it 'constructs correct cypher with association node lable' do
         @ability.can :read, Article, mentions: { user: nil }
         expect(Article.accessible_by(@ability).to_cypher).to include(
-          'OPTIONAL MATCH (article_1:`Article`) WHERE'\
-          ' (NOT (article_1:`Article`)-[:`mention`]->(:`Mention`)-[:`user`]->'\
+          'MATCH (article:`Article`) WHERE'\
+          ' (NOT (article:`Article`)-[:`mention`]->(:`Mention`)-[:`user`]->'\
           '(:`User`))'
         )
       end
