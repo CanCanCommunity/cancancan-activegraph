@@ -22,11 +22,10 @@ module CanCanCan
                        .present?
         end
 
-        def path_end_node(relationship, conditions)
+        def path_end_var(relationship, conditions)
           with_var = variable_in_path?(relationship, conditions)
           target_class = relationship.target_class
-          var_label = with_var ? var_name(target_class) : ''
-          path_node(target_class, var_label)
+          with_var ? var_name(target_class) : ''
         end
       end
     end
