@@ -10,7 +10,9 @@ module CanCan
       def database_records
         return @model_class.where('false') if @rules.empty?
         override_scope
-        return records_for_single_rule if @rules.size == 1
+        if (rule = logical_single_can_rule)
+          return records_for_single_rule(rule)
+        end
         records_for_multiple_rules.distinct
       end
 
@@ -56,8 +58,14 @@ module CanCan
 
       private
 
-      def records_for_single_rule
-        CanCanCan::Neo4j::SingleRuleCypher.new(@rules.first, @model_class)
+      def logical_single_can_rule
+        return @rules.first if @rules.size == 1
+        return unless @rules.all? { |rule| rule.base_behavior }
+        @rules.find { |rule| rule.conditions.blank? }
+      end
+
+      def records_for_single_rule(rule)
+        CanCanCan::Neo4j::SingleRuleCypher.new(rule, @model_class)
                                           .records
       end
 

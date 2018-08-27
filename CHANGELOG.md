@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.3.2
+
+Optimising cypher for single can rule.
+Optimising execution for multiple can rules with one rule with no conditions.
+
 ## 1.3.1
 
 Fixing Issue#12 - Authorizing single resource for a scope based rule

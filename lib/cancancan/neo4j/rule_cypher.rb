@@ -46,7 +46,7 @@ module CanCanCan
       end
 
       def condition_for_rule_without_conditions
-        @rule_conditions = @options[:rule].base_behavior ? '(true)' : '(false)'
+        @rule_conditions = @options[:rule].base_behavior ? '' : '(false)'
       end
 
       def construct_cypher_options
