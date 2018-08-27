@@ -270,6 +270,17 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
       expect(Article.accessible_by(@ability).to_a).to eq([article1])
     end
 
+    context 'multiple can rules with one rule without conditions' do
+      it 'fetches all the articles' do
+        @ability.can :read, Article, published: true
+        @ability.can :read, Article
+        article1 = Article.create!(published: true)
+        article2 = Article.create!(published: false)
+        expect(Article.accessible_by(@ability).to_a)
+          .to contain_exactly(article1, article2)
+      end
+    end
+
     it 'only reads comments for articles which are published' do
       @ability.can :read, Comment, article: { published: true }
       comment1 = Comment.create!(article: Article.create!(published: true))
@@ -367,13 +378,6 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
         .to include(cypher_string)
     end
 
-    it 'returns true condition for single `can` rule and default `can` rule' do
-      @ability.can :read, Article
-      @ability.can :read, Article, published: false, secret: true
-      expect(@ability.model_adapter(Article, :read).database_records.to_cypher)
-        .to include('(true)')
-    end
-
     it 'returns `false condition` for single `cannot` definition in front of default `cannot` condition' do
       @ability.cannot :read, Article
       @ability.cannot :read, Article, published: false, secret: true
@@ -384,7 +388,7 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
     it 'returns `not (condition)` for single `cannot` definition in front of default `can` condition' do
       @ability.can :read, Article
       @ability.cannot :read, Article, published: false, secret: true
-      cypher_str = 'OPTIONAL MATCH (article_1:`Article`) WHERE (true) WITH '\
+      cypher_str = 'OPTIONAL MATCH (article_1:`Article`) WITH '\
         'collect(DISTINCT article_1) as article_1_col UNWIND article_1_col'\
         ' as article_2 WITH DISTINCT article_2 as article_2 MATCH (article_2)'\
         ' WHERE NOT(article_2.published = {article_2_published} AND '\
@@ -429,8 +433,8 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
                          .database_records.to_cypher
       expect(subject2).to include('(article.name =')
       subject3 = @ability.model_adapter(Article, :read)
-                         .database_records.to_cypher
-      expect(subject3).to include('(true)')
+                         .database_records.to_cypher_with_params
+      expect(subject3).to include('MATCH (n:`Article`) RETURN n')
     end
 
     context 'with namespaced models' do
@@ -482,18 +486,6 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
           'MATCH (article:`Article`) WHERE'\
           ' (NOT (article:`Article`)-[:`mention`]->(:`Mention`)-[:`user`]->'\
           '(:`User`))'
-        )
-      end
-    end
-
-    context 'mupltile can rules with one without conditions' do
-      it 'constructs correct cypher with condition for all records' do
-        @ability.can :read, Article, mentions: { user: nil }
-        @ability.can :read, Article
-        expect(Article.accessible_by(@ability).to_cypher).to include(
-          'OPTIONAL MATCH (article_2:`Article`) WHERE (true) WITH'\
-          ' collect(DISTINCT article_2) as article_2_col UNWIND article_2_col'\
-          ' as article_can WITH DISTINCT article_can as article'
         )
       end
     end
