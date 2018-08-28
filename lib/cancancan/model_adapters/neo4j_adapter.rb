@@ -61,7 +61,7 @@ module CanCan
       def logical_single_can_rule
         return @rules.first if @rules.size == 1
         return unless @rules.all?(&:base_behavior)
-        @rules.find { |rule| rule.conditions.blank? }
+        @rules.find { |rule|  rule.conditions.is_a?(Hash) && rule.conditions.blank? }
       end
 
       def records_for_single_rule(rule)
