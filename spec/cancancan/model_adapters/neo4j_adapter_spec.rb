@@ -328,12 +328,12 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
     it 'allows a AssociationProxy scope for conditions' do
       user = User.create!(name: 'Chunky')
       ability = Ability.new(user)
-      @ability.can :read, Article, user.articles
+      ability.can :read, Article, user.articles
       article1 = Article.create!(user: user)
       article2 = Article.create!(secret: false)
-      expect(Article.accessible_by(@ability).to_a).to contain_exactly(article1)
-      expect(@ability).to be_able_to(:read, article1)
-      expect(@ability).not_to be_able_to(:read, article2)
+      expect(Article.accessible_by(ability).to_a).to contain_exactly(article1)
+      expect(ability).to be_able_to(:read, article1)
+      expect(ability).not_to be_able_to(:read, article2)
     end
 
     it 'allows a scope for conditions with mupliple rules' do
