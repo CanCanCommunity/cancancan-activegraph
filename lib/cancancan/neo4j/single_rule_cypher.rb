@@ -12,7 +12,7 @@ module CanCanCan
 
       def records
         conds = rule.conditions
-        return conds if conds.is_a?(::Neo4j::ActiveNode::Query::QueryProxy)
+        return conds if conds.is_a?(::Neo4j::ActiveNode::Query::QueryProxy) || conds.is_a?(::Neo4j::ActiveNode::HasN::AssociationProxy)
         return records_for_no_conditions if conds.blank?
         records_for_hash_conditions
       end

@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.3.4
+
+Supporting has_n association in scope for a can rule.
+
 ## 1.3.3
 
 Fix for selecting a single logical blank can rule in case of multiple can rules.
