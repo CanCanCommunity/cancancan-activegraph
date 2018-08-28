@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.3.3
+
+Fix for selecting a single logical blank can rule in case of multiple can rules.
+
 ## 1.3.2
 
 Optimising cypher for single can rule.
