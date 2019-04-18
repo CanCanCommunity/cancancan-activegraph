@@ -13,9 +13,8 @@ require 'cancancan/neo4j'
 
 require 'cancan/matchers'
 
-require 'neo4j-server'
-require 'neo4j-embedded' if RUBY_PLATFORM == 'java'
-
+require 'neo4j-core'
+require 'neo4j-community' if RUBY_PLATFORM == 'java'
 require 'neo4j/core/cypher_session'
 require 'neo4j/core/cypher_session/adaptors/http'
 require 'neo4j/core/cypher_session/adaptors/bolt'

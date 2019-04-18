@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.3.5
+
+Making specs compatible with `neo4j-core-9.0.0` 
+
 ## 1.3.4
 
 Supporting has_n association in scope for a can rule.
