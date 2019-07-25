@@ -76,3 +76,7 @@ RSpec.configure do |config|
   end
 end
 
+$expect_queries_count = 0
+Neo4j::Core::CypherSession::Adaptors::Base.subscribe_to_query do |_message|
+  $expect_queries_count += 1
+end
