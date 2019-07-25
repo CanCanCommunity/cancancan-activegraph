@@ -12,4 +12,8 @@ CanCan::ConditionsMatcher.module_eval do
     # Don't stop at "cannot" definitions when there are conditions.
     conditions_empty? ? true : @base_behavior
   end
+
+  def conditions_empty?
+    (@conditions.is_a?(Hash) && @conditions == {}) || @conditions.nil?
+  end
 end

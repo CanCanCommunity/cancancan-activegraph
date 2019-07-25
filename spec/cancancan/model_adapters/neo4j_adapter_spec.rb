@@ -501,16 +501,11 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
       end
     end
 
-    # TODO: Fix code to pass this
-    # it 'fetches only associated records when using with a scope for conditions' do
-    #   @ability.can :read, Article, Article.where(secret: true)
-    #   category1 = Category.create!(visible: false)
-    #   category2 = Category.create!(visible: true)
-    #   article1 = Article.create!(secret: true)
-    #   article1.category = category1
-    #   article2 = Article.create!(secret: true)
-    #   article2.category = category2
-    #   expect(category1.articles.accessible_by(@ability).to_a).to eq([article1])
-    # end
+    it 'does not fire query on rule with scope for only_block?' do
+      start_count = $expect_queries_count
+      @ability.can :read, Article, Article.where(published: true)
+      @ability.instance_variable_get(:@rules).first.only_block?
+      expect($expect_queries_count - start_count).to eq(0)
+    end
   end
 end
