@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.3.6
+
+Fix for issue#19. Extra query was getting fired in case of can rule with scope/QueryProxy.
+
 ## 1.3.5
 
 Making specs compatible with `neo4j-core-9.0.0` 
