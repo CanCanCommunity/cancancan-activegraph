@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.3.7
+
+Removed dependency on neo4j-core. Thanks @klobuczek
+
 ## 1.3.6
 
 Fix for issue#19. Extra query was getting fired in case of can rule with scope/QueryProxy.
