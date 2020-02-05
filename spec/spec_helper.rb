@@ -54,7 +54,7 @@ class TestDriver < Neo4j::Core::Driver
   def close; end
 end
 
-server_url = ENV['NEO4J_URL'] || 'bolt://localhost:6998'
+server_url = ENV['NEO4J_URL'] || 'bolt://localhost:7472'
 Neo4j::ActiveBase.driver = TestDriver.new(server_url)
 
 
