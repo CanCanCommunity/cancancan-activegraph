@@ -13,12 +13,10 @@ require 'cancancan/neo4j'
 
 require 'cancan/matchers'
 
-require 'neo4j-core'
-require 'neo4j-community' if RUBY_PLATFORM == 'java'
-require 'neo4j/core/cypher_session'
-require 'neo4j/core/cypher_session/adaptors/http'
-require 'neo4j/core/cypher_session/adaptors/bolt'
-require 'neo4j/core/cypher_session/adaptors/embedded'
+#require 'neo4j-core'
+require 'neo4j/core/driver'
+require 'neo4j/core'
+
 require 'pry'
 # I8n setting to fix deprecation.
 if defined?(I18n) && I18n.respond_to?('enforce_available_locales=')
@@ -29,32 +27,38 @@ end
 $LOAD_PATH.unshift File.expand_path('../support', __FILE__)
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
-TEST_SESSION_MODE = RUBY_PLATFORM == 'java' ? :embedded : :http
+server_url = ENV['NEO4J_URL'] || 'bolt://localhost:6998'
+server_username = ENV['NEO4J_USERNAME'] || 'neo4j'
+server_password = ENV['NEO4J_PASSWORD'] || 'neo4jrb rules, ok?'
 
-EMBEDDED_DB_PATH = File.join(Dir.tmpdir, 'neo4j-core-java')
+class TestDriver < Neo4j::Core::Driver
+  cattr_reader :cache, default: {}
 
-session_adaptor = case TEST_SESSION_MODE
-                  when :embedded
-                    Neo4j::Core::CypherSession::Adaptors::Embedded.new(EMBEDDED_DB_PATH, impermanent: true, auto_commit: true, wrap_level: :proc)
-                  when :http
-                    server_url = ENV['NEO4J_URL'] || 'http://localhost:7475'
-                    server_username = ENV['NEO4J_USERNAME'] || 'neo4j'
-                    server_password = ENV['NEO4J_PASSWORD'] || 'password'
+  at_exit do
+    close_all
+  end
 
-                    basic_auth_hash = {username: server_username, password: server_password}
+  default_url('bolt://neo4:neo4j@localhost:7687')
 
-                    case URI(server_url).scheme
-                    when 'http'
-                      Neo4j::Core::CypherSession::Adaptors::HTTP.new(server_url, basic_auth: basic_auth_hash, wrap_level: :proc)
-                    when 'bolt'
-                      Neo4j::Core::CypherSession::Adaptors::Bolt.new(server_url, wrap_level: :proc) # , logger_level: Logger::DEBUG)
-                    else
-                      fail "Invalid scheme for NEO4J_URL: #{scheme} (expected `http` or `bolt`)"
-                    end
-                  end
+  validate_uri do |uri|
+    uri.scheme == 'bolt'
+  end
 
-puts session_adaptor
-Neo4j::ActiveBase.current_adaptor = session_adaptor
+  class << self
+    def new_instance(url, options = {})
+      options.merge(encryption: false)
+      cache[url] ||= super
+    end
+
+    def close_all
+      cache.values.each(&:close)
+    end
+  end
+
+  def close; end
+end
+
+Neo4j::ActiveBase.driver = TestDriver.new(server_url)
 
 
 RSpec.configure do |config|
@@ -77,6 +81,6 @@ RSpec.configure do |config|
 end
 
 $expect_queries_count = 0
-Neo4j::Core::CypherSession::Adaptors::Base.subscribe_to_query do |_message|
+Neo4j::Transaction.subscribe_to_query do |_message|
   $expect_queries_count += 1
 end

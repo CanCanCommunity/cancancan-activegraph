@@ -399,13 +399,11 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
     it 'returns `not (condition)` for single `cannot` definition in front of default `can` condition' do
       @ability.can :read, Article
       @ability.cannot :read, Article, published: false, secret: true
-      cypher_str = 'OPTIONAL MATCH (article_1:`Article`) WITH '\
-        'collect(DISTINCT article_1) as article_1_col UNWIND article_1_col'\
-        ' as article_2 WITH DISTINCT article_2 as article_2 MATCH (article_2)'\
-        ' WHERE NOT(article_2.published = {article_2_published} AND '\
-        'article_2.secret = {article_2_secret}) WITH collect(DISTINCT'\
-        ' article_2) as article_2_col UNWIND article_2_col as article_can'\
-        ' WITH DISTINCT article_can as article'
+      cypher_str = 'OPTIONAL MATCH (article_1:`Article`) WITH collect(DISTINCT article_1)'\
+                   ' as article_1_col UNWIND article_1_col as article_2 WITH DISTINCT article_2'\
+                   ' as article_2 MATCH (article_2) WHERE NOT(article_2.published = $article_2_published'\
+                   ' AND article_2.secret = $article_2_secret) WITH collect(DISTINCT article_2) as '\
+                   'article_2_col UNWIND article_2_col as article_can WITH DISTINCT article_can as article'
       expect(@ability.model_adapter(Article, :read).database_records.to_cypher)
         .to include(cypher_str)
     end
@@ -436,7 +434,7 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
       @ability.can :manage, Article, name: 'Chunky'
       @ability.can :update, Article, published: true
       @ability.cannot :update, Article, secret: true
-      cypher_string = 'WHERE (article_1.name = {article_1_name})'
+      cypher_string = 'WHERE (article_1.name = $article_1_name)'
       subject1 = @ability.model_adapter(Article, :update)
                          .database_records.to_cypher
       expect(subject1).to include(cypher_string)
