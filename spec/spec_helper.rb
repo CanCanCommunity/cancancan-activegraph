@@ -13,7 +13,6 @@ require 'cancancan/neo4j'
 
 require 'cancan/matchers'
 
-#require 'neo4j-core'
 require 'neo4j/core/driver'
 require 'neo4j/core'
 
@@ -27,10 +26,7 @@ end
 $LOAD_PATH.unshift File.expand_path('../support', __FILE__)
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
-server_url = ENV['NEO4J_URL'] || 'bolt://localhost:6998'
-server_username = ENV['NEO4J_USERNAME'] || 'neo4j'
-server_password = ENV['NEO4J_PASSWORD'] || 'neo4jrb rules, ok?'
-
+# DB Driver for tests
 class TestDriver < Neo4j::Core::Driver
   cattr_reader :cache, default: {}
 
@@ -58,6 +54,7 @@ class TestDriver < Neo4j::Core::Driver
   def close; end
 end
 
+server_url = ENV['NEO4J_URL'] || 'bolt://localhost:6998'
 Neo4j::ActiveBase.driver = TestDriver.new(server_url)
 
 
