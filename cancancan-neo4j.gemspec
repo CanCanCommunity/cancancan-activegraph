@@ -18,11 +18,12 @@ Gem::Specification.new do |spec|
   spec.files         = `git ls-files lib init.rb cancancan-neo4j.gemspec`.split($INPUT_RECORD_SEPARATOR)
   spec.require_paths = ['lib']
 
+  spec.add_dependency 'activegraph', '>= 9.0.0'
   spec.add_dependency 'cancancan'
-  spec.add_dependency 'neo4j', '>= 9.0.0'
   
   spec.add_development_dependency 'bundler', '>= 1.3'
   spec.add_development_dependency 'neo4j-community' if RUBY_PLATFORM =~ /java/
+  spec.add_development_dependency("neo4j-#{RUBY_PLATFORM =~ /java/ ? 'java' : 'ruby'}-driver", '>= 0.3.0')
   spec.add_development_dependency('neo4j-rake_tasks', '>= 0.3.0')
   spec.add_development_dependency 'pry', '>= 0.11.3'
   spec.add_development_dependency 'rake', '>= 10.1'

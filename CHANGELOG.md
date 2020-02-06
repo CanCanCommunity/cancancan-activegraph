@@ -1,5 +1,9 @@
 # Change Log
 
+## 2.0.0
+
+Upgraded to activegraph gem from neo4j gem whic supports neo4j database 4.0.0
+
 ## 1.3.7
 
 Removed dependency on neo4j-core. Thanks @klobuczek
