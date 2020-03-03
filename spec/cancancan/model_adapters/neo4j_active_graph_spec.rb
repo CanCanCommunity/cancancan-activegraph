@@ -1,9 +1,9 @@
 require 'spec_helper'
 require 'support/shared_context_support'
 
-if defined? CanCan::ModelAdapters::Neo4jAdapter
+if defined? CanCan::ModelAdapters::ActiveGraphAdapter
 
-  describe CanCan::ModelAdapters::Neo4jAdapter do
+  describe CanCan::ModelAdapters::ActiveGraphAdapter do
     before :each do
       Article.delete_all
       Category.delete_all
@@ -14,10 +14,10 @@ if defined? CanCan::ModelAdapters::Neo4jAdapter
     end
 
     it 'is for only neo4j classes' do
-      expect(CanCan::ModelAdapters::Neo4jAdapter).to_not be_for_class(Object)
-      expect(CanCan::ModelAdapters::Neo4jAdapter).to be_for_class(Article)
+      expect(CanCan::ModelAdapters::ActiveGraphAdapter).to_not be_for_class(Object)
+      expect(CanCan::ModelAdapters::ActiveGraphAdapter).to be_for_class(Article)
       expect(CanCan::ModelAdapters::AbstractAdapter.adapter_class(Article))
-        .to eq(CanCan::ModelAdapters::Neo4jAdapter)
+        .to eq(CanCan::ModelAdapters::ActiveGraphAdapter)
     end
 
     it 'finds record' do

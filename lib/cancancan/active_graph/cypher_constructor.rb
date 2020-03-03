@@ -1,7 +1,7 @@
-require 'cancancan/neo4j/cypher_constructor_helper'
+require 'cancancan/active_graph/cypher_constructor_helper'
 
 module CanCanCan
-  module Neo4j
+  module ActiveGraph
     # Constructs cypher query from rule cypher options
     class CypherConstructor
       attr_reader :query, :scope
@@ -40,7 +40,7 @@ module CanCanCan
       end
 
       def unwind_query_with_distinct
-        var = CanCanCan::Neo4j::CypherConstructorHelper.var_name(@model_class)
+        var = CanCanCan::ActiveGraph::CypherConstructorHelper.var_name(@model_class)
         @query = unwind_qeury("#{var}_can")
                  .with("DISTINCT #{var}_can as #{var}")
       end

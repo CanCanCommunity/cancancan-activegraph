@@ -1,5 +1,5 @@
 module CanCanCan
-  module Neo4j
+  module ActiveGraph
     # Cypher query constructs
     class CypherConstructorHelper
       class << self

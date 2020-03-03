@@ -1,7 +1,7 @@
-require 'cancancan/neo4j/cypher_constructor_helper'
+require 'cancancan/active_graph/cypher_constructor_helper'
 
 module CanCanCan
-  module Neo4j
+  module ActiveGraph
     # Return records for single cancan rule
     class SingleRuleCypher
       attr_reader :rule, :model_class
@@ -12,7 +12,7 @@ module CanCanCan
 
       def records
         conds = rule.conditions
-        return conds if conds.is_a?(::Neo4j::ActiveNode::Query::QueryProxy) || conds.is_a?(::Neo4j::ActiveNode::HasN::AssociationProxy)
+        return conds if conds.is_a?(::ActiveGraph::Node::Query::QueryProxy) || conds.is_a?(::ActiveGraph::Node::HasN::AssociationProxy)
         return records_for_no_conditions if conds.blank?
         records_for_hash_conditions
       end
@@ -28,7 +28,7 @@ module CanCanCan
       end
 
       def records_for_hash_conditions
-        cypher = CanCanCan::Neo4j::RuleCypher.new(rule: rule,
+        cypher = CanCanCan::ActiveGraph::RuleCypher.new(rule: rule,
                                                   model_class: model_class,
                                                   index: nil)
         model_class.new_query

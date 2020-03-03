@@ -1,7 +1,7 @@
-require 'cancancan/neo4j/cypher_constructor_helper'
+require 'cancancan/active_graph/cypher_constructor_helper'
 
 module CanCanCan
-  module Neo4j
+  module ActiveGraph
     # Constructs cypher conditions for rule and cypher match classes
     class RuleCypher
       attr_reader :rule_conditions, :path, :options
@@ -23,7 +23,7 @@ module CanCanCan
 
       def construct_cypher_conditions
         conditions = @options[:rule].conditions
-        if conditions.is_a?(::Neo4j::ActiveNode::Query::QueryProxy)
+        if conditions.is_a?(::ActiveGraph::Node::Query::QueryProxy)
           return @options[:scope] = conditions
         end
         if conditions.blank?
