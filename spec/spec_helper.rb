@@ -9,12 +9,12 @@ if ENV['COVERAGE'] || ENV['CI']
 end
 
 require 'bundler/setup'
-require 'cancancan/neo4j'
+require 'cancancan/active_graph'
 
 require 'cancan/matchers'
 
-require 'neo4j/core/driver'
-require 'neo4j/core'
+require 'active_graph/core/driver'
+require 'active_graph/core'
 
 require 'pry'
 # I8n setting to fix deprecation.
@@ -27,22 +27,16 @@ $LOAD_PATH.unshift File.expand_path('../support', __FILE__)
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
 # DB Driver for tests
-class TestDriver < Neo4j::Core::Driver
+class TestDriver < ActiveGraph::Core::Driver
   cattr_reader :cache, default: {}
 
   at_exit do
     close_all
   end
 
-  default_url('bolt://neo4:neo4j@localhost:7687')
-
-  validate_uri do |uri|
-    uri.scheme == 'bolt'
-  end
-
   class << self
-    def new_instance(url, options = {})
-      cache[url] ||= super(url, options.merge(encryption: false))
+    def new_instance(url, auth_token, options = {})
+      cache[url] ||= super(url, auth_token, options.merge(encryption: false))
     end
 
     def close_all
@@ -54,7 +48,7 @@ class TestDriver < Neo4j::Core::Driver
 end
 
 server_url = ENV['NEO4J_URL'] || 'bolt://localhost:7472'
-Neo4j::ActiveBase.driver = TestDriver.new(server_url)
+ActiveGraph::Base.driver = TestDriver.new(server_url)
 
 
 RSpec.configure do |config|
@@ -68,15 +62,15 @@ RSpec.configure do |config|
   end
 
   config.before(:each) do
-    Neo4j::ModelSchema::MODEL_INDEXES.clear
-    Neo4j::ModelSchema::MODEL_CONSTRAINTS.clear
-    Neo4j::ModelSchema::REQUIRED_INDEXES.clear
-    Neo4j::ActiveNode.loaded_classes.clear
-    Neo4j::ModelSchema.reload_models_data!
+    ActiveGraph::ModelSchema::MODEL_INDEXES.clear
+    ActiveGraph::ModelSchema::MODEL_CONSTRAINTS.clear
+    ActiveGraph::ModelSchema::REQUIRED_INDEXES.clear
+    ActiveGraph::Node.loaded_classes.clear
+    ActiveGraph::ModelSchema.reload_models_data!
   end
 end
 
 $expect_queries_count = 0
-Neo4j::Transaction.subscribe_to_query do |_message|
+ActiveGraph::Transaction.subscribe_to_query do |_message|
   $expect_queries_count += 1
 end

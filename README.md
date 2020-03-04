@@ -1,4 +1,4 @@
-# CanCanCan-Neo4j
+# CanCanCan-ActiveGraph
 
 This is the adapter for the [CanCanCan](https://github.com/CanCanCommunity/cancancan) authorization
 library to automatically generate Cypher queries from ability rules. It returns QueryProxy object for resources.
@@ -14,7 +14,7 @@ Ruby >= 2.0.0
 In your `Gemfile`, insert the following line:
 
 ```ruby
-gem 'cancancan-neo4j'
+gem 'cancancan-activegraph'
 ```
 
 Given `Article` has `has_one` relation with `Author`. To give access to all articles which are authored by current users, we can use can rule like following,

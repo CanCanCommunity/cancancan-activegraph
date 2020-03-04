@@ -1,5 +1,5 @@
 class Project
-  include Neo4j::ActiveNode
+  include ActiveGraph::Node
   property :name, type: String
   # property :content, type: String
 
@@ -7,7 +7,7 @@ class Project
 end
 
 class Category
-  include Neo4j::ActiveNode
+  include ActiveGraph::Node
   property :name, type: String
   property :visible, type: Boolean
 
@@ -15,7 +15,7 @@ class Category
 end
 
 class Article
-  include Neo4j::ActiveNode
+  include ActiveGraph::Node
   property :name, type: String
   property :published, type: Boolean
   property :secret, type: Boolean
@@ -28,7 +28,7 @@ class Article
 end
 
 class Mention
-  include Neo4j::ActiveNode
+  include ActiveGraph::Node
   property :active, type: Boolean
 
   has_one :in, :article, type: :mention
@@ -36,14 +36,14 @@ class Mention
 end
 
 class Comment
-  include Neo4j::ActiveNode
+  include ActiveGraph::Node
   property :spam, type: Boolean
   
   has_one :out, :article, type: :article
 end
 
 class User
-  include Neo4j::ActiveNode
+  include ActiveGraph::Node
   property :name, type: String
   property :status, type: String
 
@@ -56,13 +56,13 @@ module Namespace
 end
 
 class Namespace::TableX
-  include Neo4j::ActiveNode
+  include ActiveGraph::Node
   
   has_many :in, :table_zs, type: :table_x, model_class: 'Namespace::TableZ'
 end
 
 class Namespace::TableZ
-  include Neo4j::ActiveNode
+  include ActiveGraph::Node
   
   has_one :out, :table_x, type: :table_x, model_class: 'Namespace::TableX'
   has_one :out, :user, type: :user

@@ -2,14 +2,14 @@
 
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'cancancan/neo4j/version'
+require 'cancancan/active_graph/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'cancancan-neo4j'
+  spec.name          = 'cancancan-activegraph'
   spec.version       = CanCanCan::Neo4j::VERSION
   spec.authors       = ['Amit Suryavanshi']
   spec.email         = ['amitbsuryavanshi@gmail.com']
-  spec.homepage      = 'https://github.com/CanCanCommunity/cancancan-neo4j'
+  spec.homepage      = 'https://github.com/CanCanCommunity/cancancan-activegraph'
   spec.summary       = 'neo4j database adapter for CanCanCan.'
   spec.description   = "Implements CanCanCan's rule-based record fetching using neo4j gem."
   spec.platform      = Gem::Platform::RUBY

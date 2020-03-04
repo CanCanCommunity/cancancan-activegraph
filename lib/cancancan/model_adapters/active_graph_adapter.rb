@@ -1,12 +1,12 @@
-require 'cancancan/neo4j/cypher_constructor_helper'
-require 'cancancan/neo4j/rule_cypher'
-require 'cancancan/neo4j/cypher_constructor'
-require 'cancancan/neo4j/single_rule_cypher'
+require 'cancancan/active_graph/cypher_constructor_helper'
+require 'cancancan/active_graph/rule_cypher'
+require 'cancancan/active_graph/cypher_constructor'
+require 'cancancan/active_graph/single_rule_cypher'
 
 module CanCan
   module ModelAdapters
     # neo4j adapter for cancan
-    class Neo4jAdapter < AbstractAdapter
+    class ActiveGraphAdapter < AbstractAdapter
       def database_records
         return @model_class.where('false') if @rules.empty?
         override_scope
@@ -17,7 +17,7 @@ module CanCan
       end
 
       def self.for_class?(model_class)
-        model_class <= Neo4j::ActiveNode
+        model_class <= ActiveGraph::Node
       end
 
       def self.override_conditions_hash_matching?(_subject, _conditions)
@@ -41,7 +41,7 @@ module CanCan
       end
 
       def self.property_matches?(subject, property, value)
-        if subject.is_a?(Neo4j::ActiveNode::HasN::AssociationProxy)
+        if subject.is_a?(ActiveGraph::Node::HasN::AssociationProxy)
           subject.where(property => value).exists?
         else
           subject.send(property) == value
@@ -68,12 +68,12 @@ module CanCan
       end
 
       def records_for_single_rule(rule)
-        CanCanCan::Neo4j::SingleRuleCypher.new(rule, @model_class)
+        CanCanCan::ActiveGraph::SingleRuleCypher.new(rule, @model_class)
                                           .records
       end
 
       def records_for_multiple_rules
-        con = CanCanCan::Neo4j::CypherConstructor.new(construct_cypher_options)
+        con = CanCanCan::ActiveGraph::CypherConstructor.new(construct_cypher_options)
         if (scope = con.scope)
           return scope
         end
@@ -83,14 +83,14 @@ module CanCan
       def construct_cypher_options
         @rules.reverse.collect.with_index do |rule, index|
           opts = { rule: rule, model_class: @model_class, index: index }
-          CanCanCan::Neo4j::RuleCypher.new(opts)
+          CanCanCan::ActiveGraph::RuleCypher.new(opts)
         end
       end
 
       def override_scope
         conditions = @rules.map(&:conditions).compact
         return unless conditions.any? do |condition|
-          condition.is_a?(Neo4j::ActiveNode::Query::QueryProxy)
+          condition.is_a?(ActiveGraph::Node::Query::QueryProxy)
         end
         return if conditions.size == 1
         return if conditions.select { |cn| cn.is_a?(Hash) && !cn.empty? }.empty?
@@ -99,7 +99,7 @@ module CanCan
 
       def raise_override_scope_error
         rule_found = @rules.detect do |rule|
-          rule.conditions.is_a?(Neo4j::ActiveNode::Query::QueryProxy)
+          rule.conditions.is_a?(ActiveGraph::Node::Query::QueryProxy)
         end
         raise Error,
               'Unable to merge an ActiveNode scope with other conditions. '\
@@ -108,14 +108,14 @@ module CanCan
       end
 
       def var_name
-        CanCanCan::Neo4j::CypherConstructorHelper.var_name(@model_class)
+        CanCanCan::ActiveGraph::CypherConstructorHelper.var_name(@model_class)
       end
     end
   end
 end
 
-module Neo4j
-  module ActiveNode
+module ActiveGraph
+  module Node
     # simplest way to add `accessible_by` to all ActiveNode models
     module ClassMethods
       include CanCan::ModelAdditions::ClassMethods
