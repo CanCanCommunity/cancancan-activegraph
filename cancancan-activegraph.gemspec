@@ -6,7 +6,7 @@ require 'cancancan/active_graph/version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'cancancan-activegraph'
-  spec.version       = CanCanCan::Neo4j::VERSION
+  spec.version       = CanCanCan::ActiveGraph::VERSION
   spec.authors       = ['Amit Suryavanshi']
   spec.email         = ['amitbsuryavanshi@gmail.com']
   spec.homepage      = 'https://github.com/CanCanCommunity/cancancan-activegraph'
@@ -15,14 +15,13 @@ Gem::Specification.new do |spec|
   spec.platform      = Gem::Platform::RUBY
   spec.license       = 'MIT'
 
-  spec.files         = `git ls-files lib init.rb cancancan-neo4j.gemspec`.split($INPUT_RECORD_SEPARATOR)
+  spec.files         = `git ls-files lib init.rb cancancan-activegraph.gemspec`.split($INPUT_RECORD_SEPARATOR)
   spec.require_paths = ['lib']
 
   spec.add_dependency 'activegraph', '>= 9.0.0'
   spec.add_dependency 'cancancan'
   
   spec.add_development_dependency 'bundler', '>= 1.3'
-  spec.add_development_dependency 'neo4j-community' if RUBY_PLATFORM =~ /java/
   spec.add_development_dependency("neo4j-#{RUBY_PLATFORM =~ /java/ ? 'java' : 'ruby'}-driver", '>= 0.3.0')
   spec.add_development_dependency('neo4j-rake_tasks', '>= 0.3.0')
   spec.add_development_dependency 'pry', '>= 0.11.3'

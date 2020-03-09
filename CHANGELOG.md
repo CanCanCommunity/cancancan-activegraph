@@ -1,8 +1,16 @@
 # Change Log
 
+## 3.0.1
+
+Fixes in deault require of gem as gem was not loaded by default in app with bundler.
+
+## 3.0.0
+
+Upgraded to latest naming changes from activegraph 10.0.0.pre.beta.2.
+
 ## 2.0.0
 
-Upgraded to activegraph gem from neo4j gem whic supports neo4j database 4.0.0
+Upgraded to activegraph gem from neo4j gem which supports neo4j database 4.0.0
 
 ## 1.3.7
 
