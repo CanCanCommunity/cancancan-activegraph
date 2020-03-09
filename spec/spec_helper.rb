@@ -9,7 +9,7 @@ if ENV['COVERAGE'] || ENV['CI']
 end
 
 require 'bundler/setup'
-require 'cancancan/active_graph'
+require 'cancancan/activegraph'
 
 require 'cancan/matchers'
 
