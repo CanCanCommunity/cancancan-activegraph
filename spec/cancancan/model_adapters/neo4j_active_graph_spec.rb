@@ -5,6 +5,14 @@ if defined? CanCan::ModelAdapters::ActiveGraphAdapter
 
   describe CanCan::ModelAdapters::ActiveGraphAdapter do
     before :each do
+      ActiveGraph::Base.label_object(Article.mapped_label_names.first).create_constraint(Article.id_property_name, type: :unique)
+      ActiveGraph::Base.label_object(Category.mapped_label_names.first).create_constraint(Category.id_property_name, type: :unique)
+      ActiveGraph::Base.label_object(Comment.mapped_label_names.first).create_constraint(Comment.id_property_name, type: :unique)
+      ActiveGraph::Base.label_object(User.mapped_label_names.first).create_constraint(User.id_property_name, type: :unique)
+      ActiveGraph::Base.label_object(Mention.mapped_label_names.first).create_constraint(Mention.id_property_name, type: :unique)
+      ActiveGraph::Base.label_object(Namespace::TableX.mapped_label_names.first).create_constraint(Namespace::TableX.id_property_name, type: :unique)
+      ActiveGraph::Base.label_object(Namespace::TableZ.mapped_label_names.first).create_constraint(Namespace::TableZ.id_property_name, type: :unique)
+      
       Article.delete_all
       Category.delete_all
       Comment.delete_all
