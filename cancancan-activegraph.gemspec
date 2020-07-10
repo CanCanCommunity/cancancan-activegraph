@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.files         = `git ls-files lib init.rb cancancan-activegraph.gemspec`.split($INPUT_RECORD_SEPARATOR)
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'activegraph', '>= 9.0.0'
+  spec.add_dependency 'activegraph', '>= 10.0.0'
   spec.add_dependency 'cancancan'
   
   spec.add_development_dependency 'bundler', '>= 1.3'
