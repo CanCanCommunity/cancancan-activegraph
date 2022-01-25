@@ -12,7 +12,7 @@ if defined? CanCan::ModelAdapters::ActiveGraphAdapter
       ActiveGraph::Base.label_object(Mention.mapped_label_names.first).create_constraint(Mention.id_property_name, type: :unique)
       ActiveGraph::Base.label_object(Namespace::TableX.mapped_label_names.first).create_constraint(Namespace::TableX.id_property_name, type: :unique)
       ActiveGraph::Base.label_object(Namespace::TableZ.mapped_label_names.first).create_constraint(Namespace::TableZ.id_property_name, type: :unique)
-      
+
       Article.delete_all
       Category.delete_all
       Comment.delete_all
@@ -377,6 +377,23 @@ if defined? CanCan::ModelAdapters::ActiveGraphAdapter
         }
       }
       expect { Comment.accessible_by(@ability) }.to_not raise_error
+    end
+
+    it 'should support deeply nested conditions with an Enumerable value' do
+      @ability.can :read, Comment, article: { category: { name: ["Cars", "Sports"] } }
+
+      category1 = Category.create!(name: "Cars", visible: true)
+      category2 = Category.create!(name: "Sports", visible: true)
+      category3 = Category.create!(name: "Books", visible: true)
+
+      comment1 = Comment.create!(article: Article.create!(category: category1))
+      comment2 = Comment.create!(article: Article.create!(category: category2))
+      comment3 = Comment.create!(article: Article.create!(category: category3))
+
+      expect(Comment.accessible_by(@ability)).to match_array([comment1, comment2])
+      expect(@ability.can?(:read, comment1)).to be(true)
+      expect(@ability.can?(:read, comment2)).to be(true)
+      expect(@ability.can?(:read, comment3)).to be(false)
     end
 
     it 'returns empty set if no abilities match' do
