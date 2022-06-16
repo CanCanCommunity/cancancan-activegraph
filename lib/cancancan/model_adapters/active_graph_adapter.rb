@@ -45,7 +45,7 @@ module CanCan
           subject.where(property => value).exists?
         else
           if value.is_a?(Enumerable)
-            subject.class.where(property => value, uuid: subject.uuid).exists?
+            subject.class.where(property => value, neo_id: subject.neo_id).exists?
           else
             subject.send(property) == value
           end
