@@ -44,7 +44,11 @@ module CanCan
         if subject.is_a?(ActiveGraph::Node::HasN::AssociationProxy)
           subject.where(property => value).exists?
         else
-          subject.send(property) == value
+          if value.is_a?(Enumerable)
+            subject.class.where(property => value, neo_id: subject.neo_id).exists?
+          else
+            subject.send(property) == value
+          end
         end
       end
 
