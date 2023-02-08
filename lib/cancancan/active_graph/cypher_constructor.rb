@@ -21,7 +21,7 @@ module CanCanCan
         rule_cyphers.each do |rule_cypher|
           construct_cypher_for_rule(rule_cypher)
         end
-        unwind_query_with_distinct
+        unwind_query_with_distinct(rule_cyphers.map { |rc| "#{rc.options[:var_label]}_col" })
       end
 
       def construct_cypher_for_rule(rule_cypher)
@@ -39,14 +39,14 @@ module CanCanCan
         @scope = rule_cypher.options[:scope]
       end
 
-      def unwind_query_with_distinct
+      def unwind_query_with_distinct(vars)
         var = CanCanCan::ActiveGraph::CypherConstructorHelper.var_name(@model_class)
-        @query = unwind_qeury("#{var}_can")
+        @query = unwind_qeury("#{var}_can", vars)
                  .with("DISTINCT #{var}_can as #{var}")
       end
 
-      def unwind_qeury(var_name)
-        @query = @query.unwind("#{@current_collection} as #{var_name}")
+      def unwind_qeury(var_name, vars = [@current_collection])
+        @query = @query.unwind("#{vars.join(' + ')} as #{var_name}")
       end
 
       def construct_can_cypher(rule_cypher)
@@ -60,7 +60,7 @@ module CanCanCan
         var = rule_cypher.options[:var_label]
         with = "collect(DISTINCT #{var}) as #{var}_col"
         if can_rule && @current_collection
-          with = "#{@current_collection} + #{with}"
+          with = "#{@current_collection}, #{with}"
         end
         @current_collection = "#{var}_col"
         with
