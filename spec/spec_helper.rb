@@ -27,9 +27,9 @@ $LOAD_PATH.unshift File.expand_path('../support', __FILE__)
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
 def set_default_driver
-  server_url = ENV['NEO4J_URL'] || 'bolt://localhost:7472'
+  server_url = ENV['NEO4J_URL'] || 'bolt://localhost:7687'
   ActiveGraph::Base.driver =
-    Neo4j::Driver::GraphDatabase.driver(server_url, Neo4j::Driver::AuthTokens.none, encryption: false)
+    Neo4j::Driver::GraphDatabase.driver(server_url, Neo4j::Driver::AuthTokens.basic('neo4j', 'password'), encryption: false)
 end
 
 set_default_driver
